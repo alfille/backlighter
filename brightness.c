@@ -1,7 +1,8 @@
-// p2013dim
-// Pixel 2013 backlight command
+// brightness
+// formerly Pixel 2013 backlight command
+// now for all laptops
 // Paul Alfille 2021
-// github.com/alfille/pixel2013
+// github.com/alfille/backlighter
 
 // MIT license
 
