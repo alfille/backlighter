@@ -1,38 +1,31 @@
-# pixel2013
-Google Chromebook Pixel 2013 control
+# backlighter
+Linux laptop screen and kepboard brightness control
 
 By Paul H Alfille 2021
 MIT license
 
 # Summary
-Simple controls for Google Chromebook Pixel 2013 backlight and keyboard lights under linux
+Simple controls for some laptop backlight and keyboard lights under linux
 
 ![Pixel picture](https://upload.wikimedia.org/wikipedia/commons/6/63/Chromebook_Pixel_%28WiFi%29_open.JPG)
 
 # Background
 
 ## Pixel 2013
-The Pixel 2013 version was the premium chromebook in the first wave of chromebooks. It had beautiful aethetics, light-weight, high resolution screen, large (for chromebook) RAM and storage, and a fast processor. Even by today's standards, it's still a nice machine.
+Inspiration was a repurposed Google Chromebook Pixel 2013
 
-Unfortunately, Google no longer suports the 2013 Pixelbook since ChromeOS only gets [5 years of support](https://support.google.com/chromebook/answer/7052113?hl=en). With some [effort](https://www.aboutchromebooks.com/news/how-to-turn-an-old-chromebook-pixel-into-native-linux-ubuntu-laptop/), (opening the machine, removing the [protection screw](https://www.chromium.org/a/chromium.org/dev/chromium-os/developer-information-for-chrome-os-devices/chromebook-pixel), flashing the [BIOS](https://mrchromebox.tech/), and installing [linux](https://lubuntu.net/downloads/)), the machine can be repurposed.
+See [pixel2013](https://github.com/alfille/pixel2013) for the full story.
 
-The standard Ubuntu distribution doesn't support key and screen brightness, suspend on closing lid, and the special keys.
+This program addresses screen and keyboard brightness for a number of devices where that capability is exposed in the `/sys/class/` virtual file system
 
-This program addresses screen and keyboard brightness.
-
-## Project has moved
-* This [project](https://github.com/alfille/pixel2013) is feature complete
-  * Supports the Google Pixel Chromebook 2013 version
-  * Further work should be in the new project
-  * Any improvements there will be back-ported
-* New name **backlighter**
-  * A "fork" of this project
-  * Supports more laptops
-  * Venue for project development
-* See [backlighter](http://github.com/alfille/backlighter)
+## Backlighter
+* This [project](https://github.com/alfille/backlighter) is a fork of the pixel2013
+  * Still supports the Google Pixel Chromebook 2013 version
+  * Development work done here
+  * Any improvements here will be back-ported
 
 # Install
-* Download source `git clone http://github.com/alfille/pixel2013`
+* Download source `git clone http://github.com/alfille/backlighter`
 * Compile `make all`
 * Install `sudo make install`
 * This wil; install
@@ -42,8 +35,8 @@ This program addresses screen and keyboard brightness.
 * Full script:
 
 ```
-git clone http://github.com/alfille/pixel2013
-cd pixel2013
+git clone http://github.com/alfille/backlighter
+cd backlighter
 make all
 sudo make install
 ```
@@ -55,23 +48,23 @@ sudo make install
 
 # Usage
 ## command line tool
-`p2013dim [-b|-k] number` -- in percent
+`brightness [-b|-k] number` -- in percent
 
 ```
-p2013dim -- set the screen or keyboard brightness level for the Google Pixel Chromebook (2013)
+brightness -- set the screen or keyboard brightness level for the Google Pixel Chromebook (2013)
 
 Writes to /sys/class -- needs root privileges
 by Paul H Alfille 2021
 
-	p2013dim -b -- show backlight percent
-	p2013dim -b 43-- set backlight percent
+	brightness -b -- show backlight percent
+	brightness -b 43-- set backlight percent
 
-	p2013dim -k -- show keylight percent
-	p2013dim -k 43-- set keylight percent
+	brightness -k -- show keylight percent
+	brightness -k 43-- set keylight percent
 
-	p2013dim -b (screen backlight) is assumed if k or b not specified
+	brightness -b (screen backlight) is assumed if k or b not specified
 
-	p2013dim -h -- this help
+	brightness -h -- this help
 ```
 ## graphical tool
 
