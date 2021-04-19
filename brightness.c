@@ -45,7 +45,7 @@ long value( char * s )
     char * endptr ;
     long b = strtol( s, &endptr, 10 ) ;
 
-    if ( (s == endptr) || (b<0.) || (b>100.) ) {
+    if ( s == endptr ) {
         help() ;
         fprintf( stderr, "\nInvalid numeric argument: %s\n", s );
         exit(1) ;
@@ -53,7 +53,16 @@ long value( char * s )
     return b ;
 }
     
-
+long percent( long b )
+{
+    if ( (b<0.) || (b>100.) ) {
+        help() ;
+        fprintf( stderr, "\nInvalid numeric argument: %ld\n", b );
+        exit(1) ;
+    }
+    return b ;
+}
+    
 int file_exists( char * dir, char * name )
 {
     // return 0 if exists
@@ -71,15 +80,17 @@ int file_exists( char * dir, char * name )
 
 char * next_dir( DIR * dir )
 {
-    struct dirent * de ;
+    struct dirent * next ;
 
     do {
-        de = readdir( dir ) ;
-        if ( de == NULL ) {
+        next = readdir( dir ) ;
+        if ( next == NULL ) {
             return NULL ;
         }
-        if ( de->d_type == DT_DIR ) {
-            return de->d_name ;
+		//printf("non-dir (%d) %s\n",next->d_type,next->d_name ) ;
+        if ( next->d_type == DT_LNK ) {
+			// For some reason, sys directories are DT_LNK not DT_DIR
+            return next->d_name ;
         }
     } while (1) ;
 }
@@ -139,11 +150,11 @@ int main( int argc, char **argv )
                 return 0 ;
             case 'b':
                 Dir = BackDir ;
-                bright = value( optarg ) ;
+                bright = percent(value( optarg )) ;
                 break ;
             case 'k':
                 Dir = KeyDir ;
-                bright = value( optarg ) ;
+                bright = percent(value( optarg )) ;
                 break ;
             case ':':
                 switch(optopt) {
@@ -166,7 +177,7 @@ int main( int argc, char **argv )
     }
 
     if ( argv[optind] != NULL ) {
-        bright = value( argv[optind] ) ;
+        bright = percent(value( argv[optind] )) ;
     }
 
     DIR * pdir = opendir( Dir ) ;
@@ -182,6 +193,7 @@ int main( int argc, char **argv )
     // loop through directories
     while ( (trydir = next_dir( pdir )) != NULL ) {
         char trypath[PATH_MAX] ;
+        //printf("Trial directory in %s: %s\n",Dir,trydir ) ;
         if ( Dir==KeyDir && strstr( trydir, "lock" ) ) {
             continue ;
         }
@@ -203,11 +215,15 @@ int main( int argc, char **argv )
                 break ;
             }
         }
+        if ( Dir==KeyDir && strstr( trydir, "light" ) != 0 ) {
+			strcpy( FullPath, trypath ) ;
+			break ;
+        }
         strcpy( FullPath, trypath ) ;                
     }
 
     if ( FullPath[0] == '\0' ) {
-        fprintf( stderr, "Not appropriate directories found in %s\n", Dir ) ;
+        fprintf( stderr, "No appropriate directories found in %s\n", Dir ) ;
         help();
         exit(1) ;
     }
