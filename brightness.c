@@ -87,9 +87,9 @@ char * next_dir( DIR * dir )
         if ( next == NULL ) {
             return NULL ;
         }
-		//printf("non-dir (%d) %s\n",next->d_type,next->d_name ) ;
+        //printf("non-dir (%d) %s\n",next->d_type,next->d_name ) ;
         if ( next->d_type == DT_LNK ) {
-			// For some reason, sys directories are DT_LNK not DT_DIR
+            // For some reason, sys directories are DT_LNK not DT_DIR
             return next->d_name ;
         }
     } while (1) ;
@@ -195,6 +195,7 @@ int main( int argc, char **argv )
         char trypath[PATH_MAX] ;
         //printf("Trial directory in %s: %s\n",Dir,trydir ) ;
         if ( Dir==KeyDir && strstr( trydir, "lock" ) ) {
+            // hint -- remove keylock and numlock...
             continue ;
         }
             
@@ -202,12 +203,15 @@ int main( int argc, char **argv )
         strcat( trypath, trydir ) ;
         strcat( trypath, "/" ) ;
         if ( file_exists( trypath, ControlMax ) != 0 ) {
+            // must have max backlight file
             continue ;
         }
         if ( file_exists( trypath, ControlCur ) != 0 ) {
+            // must have backlight file
             continue ;
         }
         if ( file_exists( trypath, ControlType) == 0 ) {
+            // hint, prefer screen backlight "raw" type
             char buffer[64] ;
             string_read( trypath, ControlType, buffer ) ;
             if ( strstr( buffer, "raw" ) ) {
@@ -216,11 +220,13 @@ int main( int argc, char **argv )
             }
         }
         if ( Dir==KeyDir && strstr( trydir, "light" ) != 0 ) {
-			strcpy( FullPath, trypath ) ;
-			break ;
+            // hint, prefer key lights with "light" in name
+            strcpy( FullPath, trypath ) ;
+            break ;
         }
         strcpy( FullPath, trypath ) ;                
     }
+    closedir( pdir ) ;
 
     if ( FullPath[0] == '\0' ) {
         fprintf( stderr, "No appropriate directories found in %s\n", Dir ) ;
@@ -228,10 +234,11 @@ int main( int argc, char **argv )
         exit(1) ;
     }
     
-    // max
+    // get max value (for scaling)
     max_bright = value_read( FullPath, ControlMax ) ;
     
     if ( bright < 0. ) {
+        // report value, not set
         long cur = value_read( FullPath, ControlCur ) ;
         printf( "%3.0f\n",100.*cur/max_bright ) ;
         return 0 ;
