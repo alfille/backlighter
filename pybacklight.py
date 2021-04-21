@@ -39,11 +39,45 @@ mainwindow = None
 iconfile = "/usr/share/icons/hicolor/64x64/backlighter.png"
 
 class popup:
-    def __init__( self, button ):
-        self.menu = tk.Menu( button, tearoff=0 )
-        self.menu.add_command( label="link key" )
+    def __init__( self ):
+        self.key = None
+        self.menu = None
+        
+    def bind( self, button ):
+        self.unbind()
+        self.button = button
+        self.menu = tk.Menu( button, tearoff=0 , title="Shortcut key", disabledforeground="red" )
+        self.menu.add_command( label="Shortcut key selection menu", state="disabled" )
+        if self.key is None:
+            self.menu.add_command( label="Current key: None", state="disabled" )
+        else:
+            self.menu.add_command( label="Current key: {}".format(self.key), state="disabled" )
         self.menu.add_separator()
-        self.menu.add_command( label="unlink" )
+        self.menu.add_command( label="Press the key you are choosing", state="disabled" )
+        self.menu.add_separator()
+        if self.key is not None:
+            self.menu.add_command( label="unlink" )
+            self.menu.add_separator()
+        self.menu.add_command( label="Cancel" )
+        self.menu.bind( "<Key>" , self.keybind )
+        return self
+        
+    def unbind( self ):
+        if self.menu:
+            self.menu.destroy()
+            self.menu = None
+
+    def keyunbind( self ):
+        if self.key is not None:
+            self.button.unbind(self.key)
+        self.key = None
+        self.bind()
+
+    def keybind( self, event ):
+        global mainwindow
+        self.key = "<{}>".format(event.keysym)
+        mainwindow.bind( self.key, self.button.invoke )
+        self.bind( self.button )
 
     def pop( self, event ):
         try:
@@ -52,7 +86,8 @@ class popup:
             self.menu.grab_release()
 
 class device:
-        basedir = "/sys/class/"
+
+    basedir = "/sys/class/"
     
     def __init__( self, devdir ):
         self.choice = None
@@ -167,6 +202,9 @@ class tab:
         self.plus = None
         self.minus = None
         self.controlvar = tk.StringVar()
+        
+        self.plusbind = popup()
+        self.minusbind = popup()
 
         self.control_panel()
                 
@@ -201,9 +239,9 @@ class tab:
             plus.destroy()
         
         self.plus = tk.Button( self.tab, text="+", font=type(self).buttonfont, command=self.plusbutton )
-        self.plus.bind( "<Button-3>", popup(self.plus).pop() )
+        self.plus.bind( "<Button-3>", self.plusbind.bind(self.plus).pop )
         self.minus = tk.Button( self.tab, text="-", font=type(self).buttonfont, command=self.minusbutton )
-        self.plus.bind( "<Button-3>", popup(self.minus).pop() )
+        self.plus.bind( "<Button-3>", self.minusbind.bind(self.minus).pop )
         
         self.plus.pack( expand=1, fill="y", padx=2, pady=2, side="right")
         self.minus.pack( expand=1, fill="y", padx=2, pady=2, side="left")
