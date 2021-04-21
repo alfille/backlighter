@@ -38,9 +38,21 @@ def signal_handler(signal, frame):
 mainwindow = None
 iconfile = "/usr/share/icons/hicolor/64x64/backlighter.png"
 
+class popup:
+    def __init__( self, button ):
+        self.menu = tk.Menu( button, tearoff=0 )
+        self.menu.add_command( label="link key" )
+        self.menu.add_separator()
+        self.menu.add_command( label="unlink" )
+
+    def pop( self, event ):
+        try:
+            self.menu.tk_popup( event.x_root, event.y_root )
+        finally:
+            self.menu.grab_release()
+
 class device:
-    
-    basedir = "/sys/class/"
+        basedir = "/sys/class/"
     
     def __init__( self, devdir ):
         self.choice = None
@@ -170,16 +182,18 @@ class tab:
             self.bad.pack( expand = 1, fill="both", padx=10, pady=10 )
             return
 
-        # Scale (slider)
+        # Scale (brightness slider)
         # possibly get settings from init file
         self.scale = tk.Scale( self.tab, from_=0, to=self.device.max, orient="horizontal", resolution=self.device.delta, bd=5, width=20, showvalue=0 )
         self.scale.set(self.device.brightness)
         self.scale.config(command=self.setlevel )
 
+        # combobox to choose file type
         self.combo = ttk.Combobox( self.tab, values=self.device.controllist, state="readonly",exportselection=0,textvariable=self.controlvar )
         self.combo.set(self.device.control)
         self.controlvar.trace( 'w', self.setcontrol )
 
+        # plus and minus Buttons
         if type(self).buttonfont is None:
             plus = tk.Button( self.tab, text="+" )
             buttonfont = font.Font( font=plus.cget("font") ).actual()
@@ -187,7 +201,9 @@ class tab:
             plus.destroy()
         
         self.plus = tk.Button( self.tab, text="+", font=type(self).buttonfont, command=self.plusbutton )
+        self.plus.bind( "<Button-3>", popup(self.plus).pop() )
         self.minus = tk.Button( self.tab, text="-", font=type(self).buttonfont, command=self.minusbutton )
+        self.plus.bind( "<Button-3>", popup(self.minus).pop() )
         
         self.plus.pack( expand=1, fill="y", padx=2, pady=2, side="right")
         self.minus.pack( expand=1, fill="y", padx=2, pady=2, side="left")
