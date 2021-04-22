@@ -68,16 +68,20 @@ class popup:
             self.menu = None
 
     def keyunbind( self ):
+        global mainwindow
         if self.key is not None:
-            self.button.unbind(self.key)
+            mainwindow.unbind(self.key)
         self.key = None
         self.bind()
 
     def keybind( self, event ):
         global mainwindow
         self.key = "<{}>".format(event.keysym)
-        mainwindow.bind( self.key, self.button.invoke )
+        mainwindow.bind( self.key, self.invoke )
         self.bind( self.button )
+        
+    def invoke( self, event ):
+        self.button.invoke()
 
     def pop( self, event ):
         try:
@@ -238,10 +242,10 @@ class tab:
             type(self).buttonfont = font.Font( family=buttonfont['family'], weight='bold', size=4*buttonfont['size'] )
             plus.destroy()
         
-        self.plus = tk.Button( self.tab, text="+", font=type(self).buttonfont, command=self.plusbutton )
-        self.plus.bind( "<Button-3>", self.plusbind.bind(self.plus).pop )
+        self.plus  = tk.Button( self.tab, text="+", font=type(self).buttonfont, command=self.plusbutton  )
+        self.plus.bind(  "<Button-3>", self.plusbind.bind( self.plus).pop  )
         self.minus = tk.Button( self.tab, text="-", font=type(self).buttonfont, command=self.minusbutton )
-        self.plus.bind( "<Button-3>", self.minusbind.bind(self.minus).pop )
+        self.minus.bind( "<Button-3>", self.minusbind.bind(self.minus).pop )
         
         self.plus.pack( expand=1, fill="y", padx=2, pady=2, side="right")
         self.minus.pack( expand=1, fill="y", padx=2, pady=2, side="left")
