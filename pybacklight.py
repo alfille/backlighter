@@ -79,6 +79,7 @@ class popup:
         self.key = "<{}>".format(event.keysym)
         mainwindow.bind( self.key, self.invoke )
         self.bind( self.button )
+        self.menu.unpost()
         
     def invoke( self, event ):
         self.button.invoke()
