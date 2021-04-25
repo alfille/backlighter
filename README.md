@@ -80,6 +80,17 @@ by Paul H Alfille 2021
 * Desktop icon and menu support
   * backlighter.desktop is included
   * menu entry should be added automatically if window manager supports OpenDesktop protocols
+* Controls for graphical application: key 
+![Backlighter controls](annotated.png)
+* Setting shortcut keys for brightness levels
+  * Shortcut works when mouse hovers over screen
+  * Open shortcut menu -- right-click "+" and "-" buttons
+![right click](rightclick.png)
+  * Setting shortcut when menu is open
+  * Click chosen key while hovering over menu
+![Shortcut menu](shortcut.png)  
+  * Clear key from same menu
+![Clear shortcut](clear.png)
 
 ## Security
 The controls require root access and so are setsuid programs (which is a possible security risk), but allow very circumscribed and sanitized input.
