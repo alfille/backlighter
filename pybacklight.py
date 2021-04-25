@@ -39,49 +39,58 @@ mainwindow = None
 iconfile = "/usr/share/icons/hicolor/64x64/backlighter.png"
 
 class popup:
+    # manages the popup menu that links shortcut keys to brightness and dim-ness
     def __init__( self ):
         self.key = None
         self.menu = None
+        self.button = None
         
-    def bind( self, button ):
-        self.unbind()
+    def MenuMake( self, button ):
+        self.MenuDestroy()
+        
         self.button = button
         self.menu = tk.Menu( button, tearoff=0 , title="Shortcut key", disabledforeground="red" )
         self.menu.add_command( label="Shortcut key selection menu", state="disabled" )
+        
         if self.key is None:
             self.menu.add_command( label="Current key: None", state="disabled" )
         else:
             self.menu.add_command( label="Current key: {}".format(self.key), state="disabled" )
+        
         self.menu.add_separator()
         self.menu.add_command( label="Press the key you are choosing", state="disabled" )
         self.menu.add_separator()
-        if self.key is not None:
-            self.menu.add_command( label="unlink" )
-            self.menu.add_separator()
-        self.menu.add_command( label="Cancel" )
-        self.menu.bind( "<Key>" , self.keybind )
-        return self
         
-    def unbind( self ):
+        if self.key is not None:
+            self.menu.add_command( label="Remove shortcut key {}".format(self.key), command=self.KeyUnbind )
+            self.menu.add_separator()
+        
+        self.menu.add_command( label="Cancel" )
+        self.menu.bind( "<Key>" , self.KeyBind )
+        
+    def MenuDestroy( self ):
         if self.menu:
             self.menu.destroy()
             self.menu = None
 
-    def keyunbind( self ):
+    def KeyUnbind( self ):
+        # Remove shortcut
         global mainwindow
         if self.key is not None:
             mainwindow.unbind(self.key)
         self.key = None
-        self.bind()
+        self.MenuMake( self.button )
 
-    def keybind( self, event ):
+    def KeyBind( self, event ):
+        # create shortcut to up/down brightness
         global mainwindow
         self.key = "<{}>".format(event.keysym)
         mainwindow.bind( self.key, self.invoke )
-        self.bind( self.button )
+        self.MenuMake( self.button )
         self.menu.unpost()
         
     def invoke( self, event ):
+        # swallows event
         self.button.invoke()
 
     def pop( self, event ):
@@ -91,6 +100,8 @@ class popup:
             self.menu.grab_release()
 
 class device:
+    # manages communication with the /sys/class file
+    # abstracts levels to percents
 
     basedir = "/sys/class/"
     
@@ -184,6 +195,10 @@ class leds(device):
         self.default()
 
 class tab:
+    # manages interface
+    # one tab for each of screen and keyboard
+    # overall widget is class-specific
+    
     tabcontrol = None
     buttonfont = None
     
@@ -208,8 +223,8 @@ class tab:
         self.minus = None
         self.controlvar = tk.StringVar()
         
-        self.plusbind = popup()
-        self.minusbind = popup()
+        self.plus_menu = popup()
+        self.minus_menu = popup()
 
         self.control_panel()
                 
@@ -244,9 +259,12 @@ class tab:
             plus.destroy()
         
         self.plus  = tk.Button( self.tab, text="+", font=type(self).buttonfont, command=self.plusbutton  )
-        self.plus.bind(  "<Button-3>", self.plusbind.bind( self.plus).pop  )
+        self.plus_menu.MenuMake( self.plus  )
+        self.plus.bind(  "<Button-3>", self.plus_menu.pop  )
+        
         self.minus = tk.Button( self.tab, text="-", font=type(self).buttonfont, command=self.minusbutton )
-        self.minus.bind( "<Button-3>", self.minusbind.bind(self.minus).pop )
+        self.minus_menu.MenuMake(self.minus )
+        self.minus.bind( "<Button-3>", self.minus_menu.pop )
         
         self.plus.pack( expand=1, fill="y", padx=2, pady=2, side="right")
         self.minus.pack( expand=1, fill="y", padx=2, pady=2, side="left")
